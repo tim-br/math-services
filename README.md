@@ -80,11 +80,6 @@ curl -X GET http://localhost:8080/api/result/TASK_ID \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-## Test Scripts
-
-- `add.sh`: Tests the addition service
-- `multiply.sh`: Tests the multiplication service
-
 ## Technical Details
 
 - Built with Go 1.21+
