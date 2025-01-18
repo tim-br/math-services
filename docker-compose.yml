@@ -1,0 +1,61 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"   # AMQP protocol port
+      - "15672:15672" # Management UI port
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - math_network
+
+  addition-service:
+    build: 
+      context: ./addition-service
+      dockerfile: Dockerfile
+    environment:
+      - AMQP_URI=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - math_network
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+  multiplication-service:
+    build:
+      context: ./multiplication-service
+      dockerfile: Dockerfile
+    environment:
+      - AMQP_URI=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - math_network
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+      replicas: 3
+  
+networks:
+  math_network:
+    driver: bridge
+
+volumes:
+  rabbitmq_data:
