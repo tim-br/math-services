@@ -145,7 +145,7 @@ func main() {
 				log.Printf("Error publishing result: %v", err)
 			}
 
-			log.Printf("Task %s: Addition result = %v", req.ID, sum)
+			log.Printf("Task %s , operation type %s : Addition result = %v", req.OperationType, req.ID, sum)
 		}
 	}()
 
